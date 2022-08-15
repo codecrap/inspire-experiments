@@ -17,8 +17,6 @@ DEFAULT_DATA_DIR = './data/'
 DEFAULT_PLOT_DIR = './plots/'
 
 
-
-
 def get_expected_value(operator, state, n):
     m = 1
     for i in range(n):
@@ -144,12 +142,12 @@ def get_Pauli_expectation_values(Beta_matrix, Gate_order, Mask, Tomo_shots_dig):
 
 def fidelity(rho_1, rho_2, trace_conserved = False):
     if trace_conserved:
-        if np.round(np.trace(rho_1), 3) !=1:
+        if np.round(np.trace(rho_1), 3) != 1:
             raise ValueError('rho_1 unphysical, trace =/= 1, but ', np.trace(rho_1))
-        if np.round(np.trace(rho_2), 3) !=1:
+        if np.round(np.trace(rho_2), 3) != 1:
             raise ValueError('rho_2 unphysical, trace =/= 1, but ', np.trace(rho_2))
     sqrt_rho_1 = sp.linalg.sqrtm(rho_1)
-    eig_vals = sp.linalg.eig(np.dot(np.dot(sqrt_rho_1,rho_2),sqrt_rho_1))[0]
+    eig_vals = sp.linalg.eig(np.dot(np.dot(sqrt_rho_1, rho_2), sqrt_rho_1))[0]
     pos_eig = [vals for vals in eig_vals if vals > 0]
     return float(np.sum(np.real(np.sqrt(pos_eig))))**2
 
