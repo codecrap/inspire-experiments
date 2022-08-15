@@ -3,6 +3,6 @@ from .analysis_tools import *
 from .experiment_library import *
 
 import logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S',
+logging.basicConfig(format='%(asctime)s - %(name)s:%(levelname)s - %(message)s',
+                    datefmt='%H:%M:%S',
                     level=logging.WARNING)
