@@ -44,15 +44,15 @@ def measure_readout_corrections(
         show_circuit: bool=True,
         send_jobs: bool=True
 ) -> tuple[list[QIJob], list[QuantumCircuit]]:
+    """ Measures readout correction calibration points for arbitrary combination of qubits."""
     jobs, circuits = [], []
-
     for state in it.product(['0', '1'], repeat=len(qubits)):
         circuit = QuantumCircuit(5,5)
-        for s, qb in zip(state, qubits):
+        for i, s in enumerate(state):
             if s == '1':
-                circuit.x(qb)
+                circuit.x(qubits[i])
             else:
-                circuit.id(qb)
+                circuit.id(qubits[i])
         circuit.barrier(range(5))
         for qb in qubits:
             circuit.measure(qb, qb)
@@ -68,7 +68,7 @@ def measure_readout_corrections(
         if send_jobs:
             log.info(f"Measuring readout correction: state {state}")
             job = qiskit.execute(circuit, shots=2**14, optimization_level=0, backend=backend)
-            ExperimentData.save_exp_result(job, exp_name, header)
+            ExperimentData.save_job_result(job, exp_name, header)
             jobs += [job]
 
     return jobs, circuits
