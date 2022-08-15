@@ -9,9 +9,9 @@ def license():
         return f.read()
 
 setup(
-    name='inspire-experiments',
+    name='inspire_experiments',
     version='0.1',
-    packages=find_packages(),
+    packages=find_packages('.'),
     url='https://github.com/codecrap/inspire-experiments',
     license='GNU General Public License v3.0',
     author='codecrap',
@@ -19,6 +19,8 @@ setup(
     description='Code and notebooks for running experiments on'
                 'QuTech Quantum Inspire https://www.quantum-inspire.com/',
     long_description=readme(),
+    python_requires='>=3.8',
+    zip_safe=False,
     install_requires=list(open('requirements.txt')
                             .read()
                             .strip()
