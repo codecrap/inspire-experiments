@@ -37,10 +37,11 @@ def get_file_header(circuit: QuantumCircuit) -> str:
     return header
 
 
-def measure_readout_corrections(
+def measure_readout_correction(
         qubits: tuple[int] | list[int],
         backend: QuantumInspireBackend,
         exp_basename: str="readout_correction",
+        extra_label: str=None,
         show_circuit: bool=True,
         send_jobs: bool=True
 ) -> tuple[list[QIJob], list[QuantumCircuit]]:
@@ -62,7 +63,9 @@ def measure_readout_corrections(
             display(circuit.draw(output='mpl', interactive=False))
 
         header = get_file_header(circuit)
-        exp_name = exp_basename + f"_qbs{qubits}" + f"_state{''.join(state)}"
+        exp_name = exp_basename + f"_qbs{qubits}"
+        exp_name = exp_name + extra_label if extra_label else exp_name
+        exp_name += f"_state{''.join(state)}"
         log.info(exp_name)
 
         if send_jobs:
