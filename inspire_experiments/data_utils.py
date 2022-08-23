@@ -154,7 +154,7 @@ class ExperimentData:
             use_string_repr: bool = True,
             directory: str = _data_dir
     ) -> np.ndarray:
-        data_hex = np.loadtxt(directory + filename, comments=comment, dtype=str, delimiter=',')
+        data_hex = np.loadtxt(directory / Path(filename), comments=comment, dtype=str, delimiter=',')
         msmt_shape = data_hex.shape
         # create binary strings of length NUM_QUBITS
         data_bin = np.array(list(map(lambda h: str(bin(int(h, 16)))[2:].zfill(NUM_QUBITS), data_hex.flatten()))).reshape(msmt_shape)

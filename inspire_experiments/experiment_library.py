@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools as it
+from tqdm import tqdm
 
 from quantuminspire.credentials import get_token_authentication
 from quantuminspire.api import QuantumInspireAPI
@@ -33,7 +34,7 @@ def inspire_login() -> tuple[QuantumInspireAPI, QuantumInspireBackend]:
     return qi, starmon5
 
 def get_file_header(circuit: QuantumCircuit) -> str:
-    header = '\n'.join(['# ' + line for line in str(circuit.draw(output='text')).split('\n')])
+    header = '\n'.join(['# ' + line for line in str(circuit.draw(output='text', vertical_compression='high')).split('\n')])
     return header
 
 
@@ -47,8 +48,9 @@ def measure_readout_correction(
 ) -> tuple[list[QIJob], list[QuantumCircuit]]:
     """ Measures readout correction calibration points for arbitrary combination of qubits."""
     jobs, circuits = [], []
-    for state in it.product(['0', '1'], repeat=len(qubits)):
-        circuit = QuantumCircuit(5,5)
+    states = list(it.product(['0', '1'], repeat=len(qubits)))
+    for state in tqdm(states, total=len(states)):
+        circuit = QuantumCircuit(5, 5)
         for i, s in enumerate(state):
             if s == '1':
                 circuit.x(qubits[i])
@@ -69,6 +71,7 @@ def measure_readout_correction(
         log.info(exp_name)
 
         if send_jobs:
+            log.info(f"Backend state: {get_starmon_status(backend._QuantumInspireBackend__api)}")
             log.info(f"Measuring readout correction: state {state}")
             job = qiskit.execute(circuit, shots=2**14, optimization_level=0, backend=backend)
             ExperimentData.save_job_result(job, exp_name, header)
