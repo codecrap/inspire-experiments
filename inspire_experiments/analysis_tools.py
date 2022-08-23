@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 import json
 import copy
@@ -11,7 +13,9 @@ from pprint import pprint
 import itertools as it
 
 from matplotlib.colors import to_rgba
-
+# import matplotlib
+# matplotlib.style.use('fivethirtyeight')
+matplotlib.style.use('seaborn')
 
 DEFAULT_DATA_DIR = './data/'
 DEFAULT_PLOT_DIR = './plots/'
@@ -43,7 +47,7 @@ def gen_M_matrix(n):
     return M
 
 
-def get_Beta_matrix(cal_shots_dig, n):
+def get_beta_matrix(cal_shots_dig, n):
     # List of different Operators
     ops = ['I', 'Z']
     Operators = [''.join(op) for op in it.product(ops, repeat=n)]
@@ -68,8 +72,8 @@ def get_Beta_matrix(cal_shots_dig, n):
 def gen_gate_order(n):
     # Gate order in experiment
     tomo_gates = ['Z', 'X', 'Y']
-    Gate_order = [''.join(op)[::-1] for op in it.product(tomo_gates, repeat=n)]
-    return np.array(Gate_order)
+    gate_order = [''.join(op)[::-1] for op in it.product(tomo_gates, repeat=n)]
+    return np.array(gate_order)
 
 
 def gen_n_Q_pauli(n):
@@ -94,24 +98,29 @@ def gen_n_Q_pauli(n):
     return Pauli_terms
 
 
-def get_Pauli_expectation_values(Beta_matrix, Gate_order, Mask, Tomo_shots_dig):
+def get_pauli_expectation_values(
+        tomo_shots_dig: dict,
+        beta_matrix: dict,
+        gate_order: np.ndarray | list,
+        mask: np.ndarray = None
+):
     '''
     Calculates Pauli expectation values (PEVs) in three steps:
         1. Calculate raw PEVs.
         2. Condition (post-select) data on no errors in stabilizers.
         3. Apply readout corrections to PEVs based on Beta matrix.
     '''
-    Qubits = list(Tomo_shots_dig.keys())  # [1:]
+    Qubits = list(tomo_shots_dig.keys())  # [1:]
     n = len(Qubits)
     # print(Qubits, n)
 
-    B_matrix = np.array([Beta_matrix[key][1:] for key in Beta_matrix.keys()])
-    B_0 = np.array([Beta_matrix[key][0] for key in Beta_matrix.keys()])
+    B_matrix = np.array([beta_matrix[key][1:] for key in beta_matrix.keys()])
+    B_0 = np.array([beta_matrix[key][0] for key in beta_matrix.keys()])
     iB_matrix = np.linalg.inv(B_matrix)
     pauli_ops = ['I', 'X', 'Y', 'Z']
     P_values = {''.join(op): [] for op in it.product(pauli_ops, repeat=n)}
     P_frac = copy.deepcopy(P_values)
-    for i, pre_rotation in enumerate(Gate_order[:]):
+    for i, pre_rotation in enumerate(gate_order[:]):
         combs = [('I', op) for op in pre_rotation]
         P_vector = {''.join(o): 1 for o in it.product(*combs)}
         for correlator in P_vector.keys():
@@ -119,10 +128,16 @@ def get_Pauli_expectation_values(Beta_matrix, Gate_order, Mask, Tomo_shots_dig):
             C = 1
             for j, qubit in enumerate(Qubits):
                 if correlator[n - j - 1] != 'I':
-                    # C *= np.array(Tomo_shots_dig[qubit][i], dtype=float)
-                    C *= np.array(Tomo_shots_dig[qubit][pre_rotation], dtype=float)
+                    # C *= np.array(tomo_shots_dig[qubit][i], dtype=float)
+                    C *= np.array(tomo_shots_dig[qubit][pre_rotation], dtype=float)
             # Post-select data on stabilizer measurements
-            C = C * Mask[i]
+            if mask is not None:
+                C *= mask[i]
+
+            # fix to allow single qubit tomography (where assignment in above loop will not happen)
+            if isinstance(C, int):
+                C = np.array([C])
+
             n_total = len(C)
             C = C[~np.isnan(C)]
             n_selec = len(C)
@@ -146,7 +161,11 @@ def get_Pauli_expectation_values(Beta_matrix, Gate_order, Mask, Tomo_shots_dig):
     return P_values, rho, P_frac
 
 
-def fidelity(rho_1, rho_2, trace_conserved=False):
+def fidelity(
+        rho_1: np.ndarray,
+        rho_2: np.ndarray,
+        trace_conserved: bool = True
+) -> float:
     if trace_conserved:
         if np.round(np.trace(rho_1), 3) != 1:
             raise ValueError('rho_1 unphysical, trace =/= 1, but ', np.trace(rho_1))
@@ -164,10 +183,15 @@ def plot_density_matrix(
         rho2=None,
         rho2_id=None,
         title='',
+        title2='',
         fidelity=None,
+        fidelity2=None,
         angle=None,
+        angle2=None,
         angle_text='',
+        angle_text2='',
         ps_frac=None,
+        ps_frac2=None,
         nr_shots=None,
         camera_azim=-55,
         camera_elev=35,
@@ -179,9 +203,11 @@ def plot_density_matrix(
     else:
         figsize = (6, 5)
         figpos = 111
+    fig = plt.figure(figsize=figsize, dpi=200, tight_layout=True)
 
-    fig = plt.figure(figsize=figsize, dpi=200)
-    for rho, rho_id in [(rho, rho_id), (rho2, rho2_id)]:
+    for rho, rho_id, title, angle, angle_text, fidelity, ps_frac \
+            in [(rho, rho_id, title, angle, angle_text, fidelity, ps_frac),
+                (rho2, rho2_id, title2, angle2, angle_text2, fidelity2, ps_frac2)]:
         if rho is None:
             continue
         ax = fig.add_subplot(figpos, projection='3d', azim=camera_azim, elev=camera_elev)
@@ -250,9 +276,9 @@ def plot_density_matrix(
         ax.set_zlabel(r'$|\rho|$', labelpad=-8, size=7, rotation=45)
         ax.set_title(title, size=7)
         # Text box
-        s = r'$F_{|\psi\rangle}=' + fr'{fidelity * 100:.1f}\%$'
-        s += '\n' + angle_text if angle_text else '\n' + r'$\mathrm{arg}(\rho_{0,15})=' + fr'{angle:.1f}^\circ$' if angle else ''
-        s += '\n' + r'$P_\mathrm{ps}=' + fr'{ps_frac * 100:.1f}\%$' if ps_frac else ''
+        s = r'$F_{|\psi\rangle}=' + fr'{fidelity * 100:.1f}\%$' if fidelity is not None else ''
+        s += '\n' + angle_text if angle_text else '\n' + r'$\mathrm{arg}(\rho_{0,-1})=' + fr'{angle:.1f}^\circ$' if angle is not None else ''
+        s += '\n' + r'$P_\mathrm{ps}=' + fr'{ps_frac * 100:.1f}\%$' if ps_frac is not None else ''
 
         # s = ''.join((r'$F_{|\psi\rangle}='+fr'{fidelity*100:.1f}\%$', '\n',
         #              angle_text))
@@ -263,14 +289,20 @@ def plot_density_matrix(
         props = dict(boxstyle='round', facecolor='white', edgecolor='gray', alpha=0.5)
         # ax.text(1, 0.4, 1, s, size=5, bbox=props, va='bottom')
         # ax.text(0.5, 0.5, 0.5, s, size=5, bbox=props, va='bottom')
-        ax.text(0.7, 0.7, 0.65, s, size=8, bbox=props, va='bottom')
+        if s:
+            ax.text(0.7, 0.7, 0.65, s, size=8, bbox=props, va='bottom')
         # ax.text2D(0.5, 0.5, s, size=5, bbox=props, va='bottom')
 
     # colorbar
     # fig.subplots_adjust(bottom=0.1)
     # cbar_ax = fig.add_axes([0.5, 1.02, 0.02, 0.5])
     # cbar_ax = fig.add_axes([0.55, 0.3, 0.01, 0.4])
-    cbar_ax = fig.add_axes([0.875, 0.2, 0.02, 0.65])
+    if rho2 is not None:
+        cbar_ax = fig.add_axes([0.94, 0.3, 0.02, 0.4])
+    else:
+        cbar_ax = fig.add_axes([0.875, 0.2, 0.02, 0.65])
+
+    fig.set_tight_layout(tight=True)
     # cbar_ax = fig.add_subplot(133)
     # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["C3",'darkseagreen',"C0",'antiquewhite',"C3"])
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
@@ -283,3 +315,43 @@ def plot_density_matrix(
     cb.ax.tick_params(labelsize=7)
 
     return fig
+
+
+def plot_pauli_exp_values(
+        pauli_terms: dict | pd.DataFrame,
+        bloch_vector_in_legend: bool = False,
+        figsize: tuple[float] = (7, 4),
+        title: str = None
+) -> tuple[plt.Figure, plt.Axes]:
+
+    if isinstance(pauli_terms, pd.DataFrame):
+        if bloch_vector_in_legend:
+            expvals = pauli_terms[:-2]
+            blochvals = pauli_terms[-2:]
+        else:
+            expvals = pauli_terms
+
+        ax = expvals.plot.bar(width=0.8, figsize=figsize, alpha=0.8, use_index=True)#, colormap='Dark2')
+        if bloch_vector_in_legend:
+            ax.legend([fr"{name}: {series.index[0]} = {series.iloc[0]:.3f}, "
+                       fr"{series.index[1]} = {series.iloc[1]:.2f}$^\circ$"
+                       for name, series in blochvals.iteritems()], loc=0)
+        else:
+            ax.legend([fr"{name}" for name in expvals.columns], loc=0)
+        ax.hlines(0, *ax.get_xlim(), 'k', linewidth=0.5)
+        ax.set_xticklabels(expvals.index.to_list(), rotation=0)
+        ax.set_ylim(-1, 1)
+        # ax.grid(True, alpha=0.5, linewidth=1)
+        ax.set(ylabel="Expectation value", xlabel="Operator", title=title)
+        fig = ax.get_figure()
+        fig.set_dpi(180)
+        return fig, ax
+    else:
+        magnitude = np.sqrt((np.array(list(pauli_terms.values()))**2).sum())
+        fig, ax = plt.subplots(figsize=figsize, dpi=120)
+        ax.bar(pauli_terms.keys(), pauli_terms.values(), alpha=0.8)
+        ax.hlines(0, *ax.get_xlim(), 'k', linewidth=0.5)
+        ax.set_ylim(-1, 1)
+        ax.set(ylabel="Expectation value", xlabel="Operator", title=title)
+        ax.legend([f"Bloch vector magnitude:\n{magnitude:.3f}"], loc=0)
+        return fig, ax
