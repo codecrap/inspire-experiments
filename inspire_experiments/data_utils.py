@@ -19,6 +19,7 @@ log.setLevel(logging.INFO)
 
 DEFAULT_DATA_DIR = './data/'
 DEFAULT_PLOT_DIR = './plots/'
+NUM_QUBITS = 5
 
 
 @dataclass
@@ -123,7 +124,7 @@ class ExperimentData:
         name: str,
         directory: str | Path = _plot_dir
     ) -> Figure:
-        log.info(f"Saving figure {fig} in {directory}")
+        log.info(f"Saving figure <{name} - {fig}> in {directory}")
         Path(directory).mkdir(parents=True, exist_ok=True)
         fig.savefig(directory / Path(name + "_PLOT.png"), format='png', dpi=200)
         return fig
@@ -153,20 +154,20 @@ class ExperimentData:
             use_string_repr: bool = True,
             directory: str = _data_dir
     ) -> np.ndarray:
-        data_hex = np.loadtxt(directory + filename, comments=comment, dtype='<U3', delimiter=',')
-        # create binary strings of length 5
-        data_bin = np.array(list(map(lambda h: str(bin(int(h, 16)))[2:].zfill(5), data_hex.flatten()))).reshape(
-            data_hex.shape)
+        data_hex = np.loadtxt(directory + filename, comments=comment, dtype=str, delimiter=',')
+        msmt_shape = data_hex.shape
+        # create binary strings of length NUM_QUBITS
+        data_bin = np.array(list(map(lambda h: str(bin(int(h, 16)))[2:].zfill(NUM_QUBITS), data_hex.flatten()))).reshape(msmt_shape)
 
         if not use_string_repr:
             # convert strings to arrays of binary integers, which creates an extra dimension in the data_bin array
-            data_bin = np.array(map(lambda s: np.fromiter(s, dtype=int), data_bin.flatten())).reshape(data_hex.shape)
+            data_bin = np.array(list(map(lambda s: np.fromiter(s, dtype=int), data_bin.flatten()))).reshape((*msmt_shape, NUM_QUBITS))
 
         if single_qubit:
             # if only one qubit is measured, just create integer 0s/1s
             # this will disregard any specific qubits in the 1-state and just return 1 if any one qubit was in 1-state
             # the lambda function produces a decimal representation of the binary (hex) string
-            data_bin = np.array(list(map(lambda d: int(d, 16), data_hex.flatten()))).reshape(data_hex.shape)
+            data_bin = np.array(list(map(lambda d: int(d, 16), data_hex.flatten()))).reshape(msmt_shape)
             data_bin = (data_bin > 0).astype(int)
 
         cls.data = data_bin
