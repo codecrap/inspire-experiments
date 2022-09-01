@@ -18,12 +18,6 @@ import logging
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-def get_starmon_status(qi_api: QuantumInspireAPI) -> str:
-    # entry for Starmon-5
-    status = qi_api.get_backend_types()[1]['status']
-    # print(status)
-    return status
-
 def inspire_login() -> tuple[QuantumInspireAPI, QuantumInspireBackend]:
     QI_URL = r'https://api.quantum-inspire.com/'
     authentication = get_token_authentication()
@@ -32,6 +26,14 @@ def inspire_login() -> tuple[QuantumInspireAPI, QuantumInspireBackend]:
     starmon5 = QI.get_backend('Starmon-5')
     print("Backend status: ", get_starmon_status(qi))
     return qi, starmon5
+
+
+def get_starmon_status(qi_api: QuantumInspireAPI) -> str:
+    # entry for Starmon-5
+    status = qi_api.get_backend_types()[1]['status']
+    # print(status)
+    return status
+
 
 def get_file_header(circuit: QuantumCircuit) -> str:
     header = '\n'.join(['# ' + line for line in str(circuit.draw(output='text', vertical_compression='high')).split('\n')])
