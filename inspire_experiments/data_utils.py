@@ -31,6 +31,7 @@ class ExperimentData:
         self._data_dir = data_dir if data_dir is not None else Path(DEFAULT_DATA_DIR)
         self._plot_dir = plot_dir if plot_dir is not None else Path(DEFAULT_PLOT_DIR)
         self._data = None
+        self._hist = None
         self._timestamp = date.today()
 
 
@@ -80,13 +81,13 @@ class ExperimentData:
 
 
     @property
-    def counts(self):
-        return self._counts
+    def hist(self):
+        return self._hist
 
 
-    @counts.setter
-    def counts(self, d: dict):
-        self._counts = d
+    @hist.setter
+    def hist(self, d: dict):
+        self._hist = d
 
 
     @classmethod
@@ -95,6 +96,7 @@ class ExperimentData:
             job: QIJob,
             exp_name: str,
             header: str = None,
+            save_counts_prob_separate: bool = False,
             directory: str | Path = _data_dir
     ) -> QIJob:
         log.info(f"Saving results for job {job.job_id()} in {directory}")
@@ -106,13 +108,25 @@ class ExperimentData:
             fmt='%s',
             header=header)
 
-        with open(directory / Path(exp_name + '_PROB.json'), 'w') as f:
-            f.write(header + '\n')
-            f.write(json.dumps(job.result().get_probabilities_multiple_measurement()))
+        probs = job.result().get_probabilities_multiple_measurement()
+        counts = job.result().data()['counts_multiple_measurement']
 
-        with open(directory / Path(exp_name + '_COUNTS.json'), 'w') as f:
-            f.write(header + '\n')
-            f.write(json.dumps(job.result().data()['counts_multiple_measurement']))
+        if save_counts_prob_separate:
+            # old style: separate files for probability and hist dicts
+            with open(directory / Path(exp_name + '_PROB.json'), 'w') as f:
+                f.write(header + '\n')
+                f.write(json.dumps(probs))
+
+            with open(directory / Path(exp_name + '_COUNTS.json'), 'w') as f:
+                f.write(header + '\n')
+                f.write(json.dumps(counts))
+        else:
+            # new style: first line hist dict, second line probability dict
+            with open(directory / Path(exp_name + '_HIST.json'), 'w') as f:
+                f.write(header + '\n')
+                f.write(json.dumps(counts))
+                f.write('\n')
+                f.write(json.dumps(probs))
 
         cls.timestamp = date.today()
         return job
@@ -138,11 +152,15 @@ class ExperimentData:
     ) -> dict:
         with open(directory / Path(filename), 'r') as f:
             data_str = [line for line in f.read().split('\n') if line[0] != comment]
-            data_dict = json.loads(data_str[0])
 
-        cls.counts = data_dict
+        # will contain either one line with dict of counts or probs for old saving style,
+        # or two lines with one dict in each, first counts then probs
+        # (see save_job_result())
+        dicts = [json.loads(line) for line in data_str]
+
+        cls.hist = dicts
         cls.timestamp = time.ctime(os.path.getmtime(directory / Path(filename)))
-        return data_dict
+        return dicts
 
 
     @classmethod
