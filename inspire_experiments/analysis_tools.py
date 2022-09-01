@@ -178,41 +178,43 @@ def fidelity(
 
 
 def plot_density_matrix(
-        rho,
-        rho_id=None,
-        rho2=None,
-        rho2_id=None,
-        title='',
-        title2='',
-        fidelity=None,
-        fidelity2=None,
-        angle=None,
-        angle2=None,
-        angle_text='',
-        angle_text2='',
-        ps_frac=None,
-        ps_frac2=None,
-        nr_shots=None,
-        camera_azim=-55,
-        camera_elev=35,
+        rho: np.ndarray,
+        rho_id: np.ndarray = None,
+        rho2: np.ndarray = None,
+        rho2_id: np.ndarray = None,
+        title: str = '',
+        title2: str = '',
+        fidelity: float = None,
+        fidelity2: float = None,
+        angle: float = None,
+        angle2: float = None,
+        angle_text: str = '',
+        angle_text2: str = '',
+        ps_frac: float = None,
+        ps_frac2: float = None,
+        nr_shots: int = None,
+        camera_azim: float = -55,
+        camera_elev: float = 35,
         **kw,
 ):
     if rho2 is not None:
         figsize = (9, 8)
-        figpos = 121
+        fig, axs = plt.subplots(1, 2, figsize=figsize, dpi=200, squeeze=False,# constrained_layout=True
+                                subplot_kw=dict(projection='3d', azim=camera_azim, elev=camera_elev))
     else:
         figsize = (6, 5)
-        figpos = 111
-    fig = plt.figure(figsize=figsize, dpi=200, tight_layout=True)
+        fig, axs = plt.subplots(1, 1, figsize=figsize, dpi=200, squeeze=False,# constrained_layout=True
+                                subplot_kw=dict(projection='3d', azim=camera_azim, elev=camera_elev))
 
-    for rho, rho_id, title, angle, angle_text, fidelity, ps_frac \
-            in [(rho, rho_id, title, angle, angle_text, fidelity, ps_frac),
-                (rho2, rho2_id, title2, angle2, angle_text2, fidelity2, ps_frac2)]:
+    for i, (rho, rho_id, title, angle, angle_text, fidelity, ps_frac) \
+            in enumerate([(rho, rho_id, title, angle, angle_text, fidelity, ps_frac),
+                        (rho2, rho2_id, title2, angle2, angle_text2, fidelity2, ps_frac2)]):
         if rho is None:
             continue
-        ax = fig.add_subplot(figpos, projection='3d', azim=camera_azim, elev=camera_elev)
-        figpos += 1
+
+        ax = axs.flatten()[i]
         n = len(rho)
+        labelsize = 6 if rho2 is not None else 9
         # xedges = np.arange(-.75, n, 1)
         # yedges = np.arange(-.75, n, 1)
         xedges = np.linspace(0, 1, n + 1)
@@ -225,21 +227,17 @@ def plot_density_matrix(
         dz = np.abs(rho).ravel()
         # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["C3",'darkseagreen',"C0",'antiquewhite',"C3"])
         # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["firebrick",'forestgreen','snow',"royalblue","firebrick"])
+        # cmap = matplotlib.cm.get_cmap('seismic')
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list("",
                                                                    ["firebrick", 'darkseagreen', 'snow', "steelblue",
                                                                     "firebrick"])
-        # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["black",'blue',"white",'red',"black"])
         norm = matplotlib.colors.Normalize(vmin=-np.pi, vmax=np.pi)
-        # cmap = matplotlib.cm.get_cmap('seismic')
         # norm = matplotlib.colors.CenteredNorm(vcenter=0, halfrange=np.pi)
-        # color = cmap(norm([np.angle(e) for e in rho.ravel()]))
         color = cmap(norm(np.angle(rho).ravel()))
-        # print(list(zip(np.angle(rho).ravel(), norm(np.angle(rho).ravel()))))
         ax.bar3d(xpos, ypos, zpos, dx, dy, dz, zsort='max',
                  color=color, alpha=0.8, edgecolor='black', linewidth=.1)
 
         if rho_id is not None:
-            # color_id = cmap(norm([np.angle(e) for e in rho_id.ravel()]))
             color_id = cmap(norm(np.angle(rho_id).ravel()))
             dz1 = np.abs(rho_id).ravel()
             # selector
@@ -256,11 +254,11 @@ def plot_density_matrix(
         tick_period = n // (3 - 2 * (N % 2)) - N % 2
         ax.set_xticks(xpos[::n][::tick_period] + 1 / n / 2)
         ax.set_yticks(ypos[:n:tick_period] + 1 / n / 2)
-        ax.set_xticklabels(combs[::tick_period], rotation=20, fontsize=6, ha='right')
-        ax.set_yticklabels(combs[::tick_period], rotation=-40, fontsize=6)
-        ax.tick_params(axis='x', which='major', pad=-6, labelsize=6)
-        ax.tick_params(axis='y', which='major', pad=-6, labelsize=6)
-        ax.tick_params(axis='z', which='major', pad=-2, labelsize=6)
+        ax.set_xticklabels(combs[::tick_period], rotation=20, fontsize=labelsize, ha='right')
+        ax.set_yticklabels(combs[::tick_period], rotation=10, fontsize=labelsize)
+        ax.tick_params(axis='x', which='major', pad=-6, labelsize=labelsize)
+        ax.tick_params(axis='y', which='major', pad=-6, labelsize=labelsize)
+        ax.tick_params(axis='z', which='major', pad=-2 if rho2 is not None else 0, labelsize=labelsize)
         for tick in ax.yaxis.get_majorticklabels():
             tick.set_horizontalalignment("left")
 
@@ -273,47 +271,36 @@ def plot_density_matrix(
             ax.set_zticklabels(['0', '', '0.25', '', '0.5'])
             ax.set_zlim(0, 0.5)
 
-        ax.set_zlabel(r'$|\rho|$', labelpad=-8, size=7, rotation=45)
-        ax.set_title(title, size=7)
+        ax.set_zlabel(r'$|\rho|$',
+                      labelpad=-6 if rho2 is not None else -2,
+                      size=10 if rho2 is not None else 12,
+                      rotation=45)
+        ax.set_title(title, size=7 if rho2 is not None else 9)
         # Text box
         s = r'$F_{|\psi\rangle}=' + fr'{fidelity * 100:.1f}\%$' if fidelity is not None else ''
-        s += '\n' + angle_text if angle_text else '\n' + r'$\mathrm{arg}(\rho_{0,-1})=' + fr'{angle:.1f}^\circ$' if angle is not None else ''
+        s += '\n' + angle_text if angle_text \
+            else '\n' + r'$\mathrm{arg}(\rho_{0,-1})=' + fr'{angle:.1f}^\circ$' if angle is not None else ''
         s += '\n' + r'$P_\mathrm{ps}=' + fr'{ps_frac * 100:.1f}\%$' if ps_frac is not None else ''
 
-        # s = ''.join((r'$F_{|\psi\rangle}='+fr'{fidelity*100:.1f}\%$', '\n',
-        #              angle_text))
-        # r'$\mathrm{arg}(\rho_{0,15})='+fr'{angle:.1f}^\circ$'))
-        # '\n',
-        # r'$P_\mathrm{ps}='+fr'{ps_frac*100:.1f}\%$', '\n',
-        # f'# shots per Pauli {nr_shots}'))
-        props = dict(boxstyle='round', facecolor='white', edgecolor='gray', alpha=0.5)
-        # ax.text(1, 0.4, 1, s, size=5, bbox=props, va='bottom')
-        # ax.text(0.5, 0.5, 0.5, s, size=5, bbox=props, va='bottom')
+        props = dict(boxstyle='round', facecolor='white', edgecolor='gray', alpha=0.4)
         if s:
-            ax.text(0.7, 0.7, 0.65, s, size=8, bbox=props, va='bottom')
-        # ax.text2D(0.5, 0.5, s, size=5, bbox=props, va='bottom')
+            ax.text(0.6, 0.7, 0.66, s, size=8 if rho2 is not None else 10, bbox=props, va='bottom')
+            # ax.text(0.5, 0.5, 0.5, s, size=5, bbox=props, va='bottom')
+            # ax.text(1, 0.4, 1, s, size=5, bbox=props, va='bottom')
+            # ax.text2D(0.5, 0.5, s, size=5, bbox=props, va='bottom')
 
     # colorbar
-    # fig.subplots_adjust(bottom=0.1)
-    # cbar_ax = fig.add_axes([0.5, 1.02, 0.02, 0.5])
-    # cbar_ax = fig.add_axes([0.55, 0.3, 0.01, 0.4])
-    if rho2 is not None:
-        cbar_ax = fig.add_axes([0.94, 0.3, 0.02, 0.4])
-    else:
-        cbar_ax = fig.add_axes([0.875, 0.2, 0.02, 0.65])
-
-    fig.set_tight_layout(tight=True)
-    # cbar_ax = fig.add_subplot(133)
-    # cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["C3",'darkseagreen',"C0",'antiquewhite',"C3"])
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-    cb = matplotlib.colorbar.ColorbarBase(cbar_ax, cmap=cmap, norm=norm,
-                                          orientation='vertical')
-    # cb = plt.colorbar(sm, ax=ax, orientation='vertical')
-    cb.set_ticks([-np.pi, -np.pi / 2, 0, np.pi / 2, np.pi])
-    cb.set_ticklabels(['$-\pi$', '$-\pi/2$', '0', '$\pi/2$', '$\pi$'])
-    cb.set_label(r'arg$(\rho)$', fontsize=7, labelpad=-10)
-    cb.ax.tick_params(labelsize=7)
+    cb = fig.colorbar(sm, ax=axs, orientation='vertical',
+                      shrink=0.4 if rho2 is not None else 0.9,
+                      pad=0.05 if rho2 is not None else 0.1)
+    cb.set_ticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi])
+    cb.set_ticklabels(['$-\pi$', '$-\pi/2$', '0', '$\pi/2$', '$\pi$'], fontsize=labelsize+1)
+    cb.set_label(r'arg$(\rho)$', fontsize=labelsize+2, labelpad=-10)
+    # cb.ax.tick_params(labelsize=7)
 
+    # fig.subplots_adjust(bottom=0.01, top=0.9, right=0.9)
+    fig.set_tight_layout(tight=True)
     return fig
 
 
