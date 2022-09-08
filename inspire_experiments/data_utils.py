@@ -133,10 +133,10 @@ class ExperimentData:
 
     @classmethod
     def save_fig(
-        cls,
-        fig: Figure,
-        name: str,
-        directory: str | Path = _plot_dir
+            cls,
+            fig: Figure,
+            name: str,
+            directory: str | Path = _plot_dir
     ) -> Figure:
         log.info(f"Saving figure <{name} - {fig}> in {directory}")
         Path(directory).mkdir(parents=True, exist_ok=True)
@@ -168,10 +168,26 @@ class ExperimentData:
             cls,
             filename: str,
             comment: str = '#',
-            single_qubit: bool = False,
+            convert_all_counts_to_one: bool = False,
             use_string_repr: bool = True,
             directory: str = _data_dir
     ) -> np.ndarray:
+        """
+
+        Args:
+            filename:
+            comment:
+            convert_all_counts_to_one:
+            use_string_repr:
+            directory:
+
+        Returns:
+            data_bin:
+
+        """
+        # ensure file has correct ending
+        if filename[-4:].lower() != '.csv':
+            filename += '.csv'
         data_hex = np.loadtxt(directory / Path(filename), comments=comment, dtype=str, delimiter=',')
         msmt_shape = data_hex.shape
         # create binary strings of length NUM_QUBITS
@@ -181,7 +197,7 @@ class ExperimentData:
             # convert strings to arrays of binary integers, which creates an extra dimension in the data_bin array
             data_bin = np.array(list(map(lambda s: np.fromiter(s, dtype=int), data_bin.flatten()))).reshape((*msmt_shape, NUM_QUBITS))
 
-        if single_qubit:
+        if convert_all_counts_to_one:
             # if only one qubit is measured, just create integer 0s/1s
             # this will disregard any specific qubits in the 1-state and just return 1 if any one qubit was in 1-state
             # the lambda function produces a decimal representation of the binary (hex) string
@@ -191,3 +207,32 @@ class ExperimentData:
         cls.data = data_bin
         cls.timestamp = time.ctime(os.path.getmtime(directory / Path(filename)))
         return data_bin
+
+    @classmethod
+    def get_results_for_qubit(
+            cls,
+            data: np.ndarray,
+            qubit: int,
+            convert_to_plus_minus_one: bool = False,
+    ) -> np.ndarray:
+        """
+        Selects the results for `qubit` from array `data` of binary results for all qubits.
+        Binary results inside `data` can be both binary strings or binary arrays.
+        Assumes little-endian format of results, meaning the least significant qubit 0 is in last position (rightmost bit),
+        and the most significant qubit 4 is first position (leftmost bit).
+        See the [Quantum Inspire Knowledge Base](https://www.quantum-inspire.com/kbase/binary-register/) for info.
+
+        Args:
+            data: Array containing measurement results as binary strings or binary arrays
+            qubit: The qubit (number from 0 to 4) for which to select results.
+            convert_to_plus_minus_one:
+
+        Returns:
+            qubit_results: Data of same shape as `data`, but filtered to contain only the qubit results
+        """
+        qubit_results = np.array(list(map(lambda s: s[-1-qubit], data.flat)), dtype=int)
+        if convert_to_plus_minus_one:
+            qubit_results = 1 - 2*qubit_results
+        qubit_results = qubit_results.reshape(data.shape)
+
+        return qubit_results
