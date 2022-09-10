@@ -1,8 +1,6 @@
-
-[<img align="left" src="https://www.datocms-assets.com/5203/1586261721-starmon-5-no-border.svg" width="90px" height="85px">](https://www.quantum-inspire.com/backends/starmon-5/) 
+[<img align="left" src="https://www.datocms-assets.com/5203/1586261721-starmon-5-no-border.svg" width="70px" height="105px">](https://www.quantum-inspire.com/backends/starmon-5/) 
 # inspire-experiments
-
-#### Code and notebooks for running, saving and analyzing experiments on [QuTech Quantum Inspire](https://www.quantum-inspire.com/).
+#### Helper library to conveniently run, save and analyze quantum experiments on [QuTech's Quantum Inspire](https://www.quantum-inspire.com/)
 
 This package is mostly focused on using the [Starmon-5](https://www.quantum-inspire.com/backends/starmon-5/) hardware backend, 
 but is easily applicable/extendable to using other backends of _Quantum Inspire_.
@@ -11,7 +9,7 @@ The main thing is that in most places, it is assumed/hardcoded that the backend 
 Here we use [_Qiskit_](https://github.com/Qiskit/qiskit) to generate the experiment circuits and send jobs just for convenience,
 but it is also possible to use _Quantum Inspire's_ native cQUASM language as shown in [this example](https://www.quantum-inspire.com/kbase/using-api-and-sdk/). 
 The main difference for the user is that one would have to operate on strings instead of objects to make the circuit 
-(Qiskit can create a QASM representation of its circuit objects)
+(Qiskit can create a QASM representation of its circuit objects).
 
 ## Installation
 
@@ -82,6 +80,9 @@ of the array contains all shots corresponding to one (or several) measurements e
 To understand the scheduling of measurements (and other operations) see the scheduling section of the [Knowledge Base](https://www.quantum-inspire.com/kbase/starmon-5-operational-specifics/).
 
 
-## Examples
+## Examples & more
 
-Check the `./notebooks` directory for more detailed and advanced usage examples.
+Check the `./notebooks` directory for more detailed and advanced usage examples of actual experiments you can run.
+
+For more documentation about _Quantum Inspire_ itself, visit the [Knowledge Base](https://www.quantum-inspire.com/kbase/introduction-to-quantum-computing).
+It also contains detailed examples of experiments that you can run yourself from Jupyter Notebooks (which are hosted [here](https://github.com/QuTech-Delft/quantum-inspire-examples)).
