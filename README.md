@@ -39,6 +39,7 @@ Helper library to conveniently run, save and analyze quantum experiments on <a h
 [![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/codecrap/inspire-experiments?include_prereleases&logo=github)](https://github.com/codecrap/inspire-experiments/releases)
 [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/codecrap/inspire-experiments?logo=github)](https://github.com/codecrap/inspire-experiments/releases)
 ![visitors card](https://visitor-badge.glitch.me/badge?page_id=codecrap.visitor-badge)
+[![GitHub forks](https://img.shields.io/github/forks/codecrap/inspire-experiments?color=orange&style=social)](https://github.com/codecrap/inspire-experiments/network/members)
 
 This package is mostly focused on using the [Starmon-5](https://www.quantum-inspire.com/backends/starmon-5/) hardware backend, 
 but is easily applicable/extendable to using other backends of _Quantum Inspire_.
