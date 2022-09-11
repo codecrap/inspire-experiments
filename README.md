@@ -33,12 +33,12 @@ Helper library to conveniently run, save and analyze quantum experiments on <a h
 # inspire-experiments
 ##### Helper library to conveniently run, save and analyze quantum experiments on [QuTech's Quantum Inspire](https://www.quantum-inspire.com/)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg?logo=python&logoColor=ffdd54)](https://www.python.org/downloads/release/python-3100/)
-[![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?logo=jupyter&logoColor=white)](https://jupyter.org/)
+[![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?logo=jupyter&color=gray)](https://jupyter.org/)
 [![License](https://img.shields.io/github/license/codecrap/inspire-experiments?logo=gnu)](https://github.com/codecrap/inspire-experiments/blob/main/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/codecrap/inspire-experiments?logo=github)](https://github.com/codecrap/inspire-experiments/commits/main)
 [![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/codecrap/inspire-experiments?include_prereleases&logo=github)](https://github.com/codecrap/inspire-experiments/releases)
 [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/codecrap/inspire-experiments?logo=github)](https://github.com/codecrap/inspire-experiments/releases)
-![visitors card](https://visitor-badge.glitch.me/badge?page_id=codecrap.visitor-badge)
+![Repo Visitors](https://visitor-badge-reloaded.herokuapp.com/badge?page_id=codecrap.inspire-experiments.visitor-badge&style=social&logo=github&logoColor=black&cache=on)
 [![GitHub forks](https://img.shields.io/github/forks/codecrap/inspire-experiments?color=orange&style=social)](https://github.com/codecrap/inspire-experiments/network/members)
 
 This package is mostly focused on using the [Starmon-5](https://www.quantum-inspire.com/backends/starmon-5/) hardware backend, 
