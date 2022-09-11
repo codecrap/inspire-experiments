@@ -1,6 +1,35 @@
-[<img align="left" src="https://www.datocms-assets.com/5203/1586261721-starmon-5-no-border.svg" width="70px" height="105px">](https://www.quantum-inspire.com/backends/starmon-5/) 
+
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=codecrap&show_icons=true&hide_border=true&theme=onedark&count_private=true&repo=inspire-experiments)](https://github.com/codecrap/inspire-experiments)
+
+
+<!--
+<table cellspacing="0" cellpadding="0">
+ <tr>
+    <td> 
+      <a href="https://github.com/codecrap/inspire-experiments">
+        <img align="left" src="https://github-readme-stats.vercel.app/api/pin/?username=codecrap&show_icons=true&hide_border=true&theme=onedark&count_private=true&repo=inspire-experiments" width="200px" height="105px">
+      </a>
+  </td>
+  <td> 
+      <a href="https://www.quantum-inspire.com/backends/starmon-5/">
+  <img align="left" src="https://www.datocms-assets.com/5203/1586261721-starmon-5-no-border.svg" width="70px" height="106px"> 
+      </a>
+    <h1 >
+    inspire-experiments
+    <h/>
+    <h4>
+Helper library to conveniently run, save and analyze quantum experiments on <a href="https://www.quantum-inspire.com/"> QuTech's Quantum Inspire <a/>  
+    </h4>
+    </td>
+ </tr>
+</table>
+-->
+
+
+[<img align="left" src="https://www.datocms-assets.com/5203/1586261721-starmon-5-no-border.svg" width="90px" height="105px">](https://www.quantum-inspire.com/backends/starmon-5/) 
 # inspire-experiments
-#### Helper library to conveniently run, save and analyze quantum experiments on [QuTech's Quantum Inspire](https://www.quantum-inspire.com/)
+##### Helper library to conveniently run, save and analyze quantum experiments on [QuTech's Quantum Inspire](https://www.quantum-inspire.com/)
+
 
 This package is mostly focused on using the [Starmon-5](https://www.quantum-inspire.com/backends/starmon-5/) hardware backend, 
 but is easily applicable/extendable to using other backends of _Quantum Inspire_.
