@@ -31,15 +31,16 @@ Helper library to conveniently run, save and analyze quantum experiments on <a h
 
 [<img align="left" src="https://www.datocms-assets.com/5203/1586261721-starmon-5-no-border.svg" width="90px" height="105px">](https://www.quantum-inspire.com/backends/starmon-5/) 
 # inspire-experiments
-##### Helper library to conveniently run, save and analyze quantum experiments on [QuTech's Quantum Inspire](https://www.quantum-inspire.com/)
+#### Helper library to conveniently run, save and analyze quantum experiments on [QuTech's Quantum Inspire](https://www.quantum-inspire.com/)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg?logo=python&logoColor=ffdd54)](https://www.python.org/downloads/release/python-3100/)
 [![Jupyter Notebook](https://img.shields.io/badge/jupyter-%23FA0F00.svg?logo=jupyter&color=gray)](https://jupyter.org/)
 [![License](https://img.shields.io/github/license/codecrap/inspire-experiments?logo=gnu)](https://github.com/codecrap/inspire-experiments/blob/main/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/codecrap/inspire-experiments?logo=github)](https://github.com/codecrap/inspire-experiments/commits/main)
 [![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/codecrap/inspire-experiments?include_prereleases&logo=github)](https://github.com/codecrap/inspire-experiments/releases)
 [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/codecrap/inspire-experiments?logo=github)](https://github.com/codecrap/inspire-experiments/releases)
-![Repo Visitors](https://visitor-badge-reloaded.herokuapp.com/badge?page_id=codecrap.inspire-experiments.visitor-badge&style=social&logo=github&logoColor=black&cache=on)
-[![GitHub forks](https://img.shields.io/github/forks/codecrap/inspire-experiments?color=orange&style=social)](https://github.com/codecrap/inspire-experiments/network/members)
+
+![Repo Visitors](https://visitor-badge-reloaded.herokuapp.com/badge?page_id=codecrap.inspire-experiments.visitor-badge&style=social&logo=github&logoColor=black)
+[![GitHub forks](https://img.shields.io/github/forks/codecrap/inspire-experiments?style=social)](https://github.com/codecrap/inspire-experiments/network/members)
 
 This package is mostly focused on using the [Starmon-5](https://www.quantum-inspire.com/backends/starmon-5/) hardware backend, 
 but is easily applicable/extendable to using other backends of _Quantum Inspire_.
